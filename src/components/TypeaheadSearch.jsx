@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Suggestions from "./Suggestions";
 import { debounce } from "../helpers/debounce";
 
@@ -22,7 +22,7 @@ function TypeaheadSearch(props) {
     onChange(event.target.value);
   };
 
-  const fetchSuggestions = async (query) => {
+  const fetchSuggestions = useCallback(async (query) => {
     setLoading(true);
     setError("");
     try {
@@ -36,13 +36,14 @@ function TypeaheadSearch(props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getSuggestions]);
 
-  const debouncedFetchSuggestions = useCallback(
-    debounce((query) => {
-      fetchSuggestions(query);
-    }, 500),
-    [],
+  const debouncedFetchSuggestions = useMemo(
+    () =>
+      debounce((query) => {
+        fetchSuggestions(query);
+      }, 500),
+    [fetchSuggestions],
   );
 
   useEffect(() => {
